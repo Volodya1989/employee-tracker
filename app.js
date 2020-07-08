@@ -130,9 +130,6 @@ function addRole() {
       });
   });
 }
-
-  
-
 //need to figure out how to connect role to manager_id????????????/
 function addEmployee() {
   console.log("add employee");
@@ -164,7 +161,7 @@ function addEmployee() {
           type: "list",
           message: "Who is employee's manager?",
           name: "manager_id",
-          choices: [1, 2, 3],
+          choices: [1, 2, 5],
         },
       ])
       .then((data) => {
@@ -193,6 +190,77 @@ function addEmployee() {
         });
       });
   });
+}
+  
+//JUST FOR PRACTICE
+//need to figure out how to connect role to manager_id????????????/
+function addEmployee() {
+  console.log("add employee");
+  connection.query("SELECT * FROM role", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    // console.log(res);
+    const arrayOfTitles = res.map((item) => item.title);
+    connection.query("SELECT * FROM employee WHERE role_id=11", function (err, man) {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      // console.log(res);
+      const arrayOfManagers = man.map(({id, first_name, last_name}) =>({ name:
+         `${first_name} ${last_name} `, value: id}) );
+      
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "What is the employee's first name?",
+          name: "first_name",
+        },
+        {
+          type: "input",
+          message: "What is the employee's last name?",
+          name: "last_name",
+        },
+        {
+          type: "list",
+          message: "What is employee's role?",
+          name: "role_id",
+          choices: arrayOfTitles,
+        },
+        {
+          type: "list",
+          message: "Who is employee's manager?",
+          name: "manager_id",
+          choices: arrayOfManagers,
+        },
+      ])
+      .then((data) => {
+        console.log(data);
+
+        let selectedId = {};
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].title === data.role_id) {
+            selectedId = res[i];
+          }
+        }
+        
+        console.log(selectedId.id)
+        const { first_name, last_name,manager_id } = data;
+        connection.query("INSERT INTO employee SET ?", {
+          first_name:first_name,
+          last_name:last_name,
+          role_id:selectedId.id,
+          manager_id:manager_id,
+        }, function (
+          err,
+          res
+        ) {
+          if (err) throw err;
+          console.log(res.affectedRows + " item inserted!\n");
+          init();
+        });
+      });
+  });
+});
 }
 
 function viewDepartments() {
@@ -228,8 +296,9 @@ function updateEmployee() {
     if (err) throw err;
     // Log all results of the SELECT statement
     console.log(res);
-    const arrayOfEmployee = res.map((item) => `${item.first_name} ${item.last_name} `);
-
+    // const arrayOfEmployee = res.map((item) => `${item.first_name} ${item.last_name} `);
+    const arrayOfEmployee = res.map(({id, first_name, last_name}) =>({ name:
+      `${first_name} ${last_name} `, value: id}) );
     inquirer
       .prompt([
        
@@ -241,31 +310,17 @@ function updateEmployee() {
         }
       ])
       .then((data) => {
-        console.log(data);
+        // console.log(data);
 
-        let selectedId = {};
+        let empId = {};
         for (let i = 0; i < res.length; i++) {
-          if (`${res[i].first_name} ${res[i].last_name}` === data.name) {
-            selectedId = res[i];
+         
+          if (res[i].id === data.name) {
+            empId = res[i].id;
           }
         }
-         selectedId;
-        console.log(selectedId)
-        updateRole(id)
-        // const { first_name, last_name,manager_id } = data;
-        // connection.query("INSERT INTO employee SET ?", {
-        //   first_name:first_name,
-        //   last_name:last_name,
-        //   role_id:selectedId.id,
-        //   manager_id:manager_id,
-        // }, function (
-        //   err,
-        //   res
-        // ) {
-        //   if (err) throw err;
-        //   console.log(res.affectedRows + " item inserted!\n");
-        //   init();
-        // });
+        updateRole(empId)
+       
       });
   });
 }
