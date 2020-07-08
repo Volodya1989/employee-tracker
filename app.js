@@ -17,8 +17,6 @@ const connection = mysql.createConnection({
   database: "employee_tracker_db",
 });
 
-const add = new Add();
-
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId + "\n");
@@ -51,29 +49,6 @@ function init() {
   });
 }
 
-// function addDepartment() {
-//     console.log("add department");
-//     inquirer
-//       .prompt([
-//         {
-//           type: "input",
-//           name: "name",
-//           message: "What is the name of Department?",
-//         },
-//       ])
-//       .then((data) => {
-//         console.log(data);
-//         connection.query("INSERT INTO department SET ?", data, function (
-//           err,
-//           res
-//         ) {
-//           if (err) throw err;
-//           console.log(res.affectedRows + " item inserted!\n");
-//           init();
-//         });
-//       });
-//   }
-
 function addDepartment() {
   console.log("add department");
   inquirer
@@ -97,13 +72,13 @@ function addDepartment() {
     });
 }
 
-//need to figure out how to connect department to department_id????????????/
+
 function addRole() {
   console.log("add role");
-  connection.query("SELECT name FROM department", function (err, res) {
+  connection.query("SELECT * FROM department", function (err, res) {
     if (err) throw err;
     // Log all results of the SELECT statement
-    // console.log(res);
+    console.log(res);
     const arrayOfDepartments = res.map((item) => item.name);
     inquirer
       .prompt([
@@ -126,7 +101,22 @@ function addRole() {
       ])
       .then((data) => {
         console.log(data);
-        connection.query("INSERT INTO role SET ?", data, function (err, res) {
+        let selectedId = {};
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].name === data.department_id) {
+            selectedId = res[i];
+          }
+        }
+        console.log(selectedId)
+        const { title, salary} = data;
+        connection.query("INSERT INTO role SET ?",{
+          title:title,
+          salary:salary,
+          department_id:selectedId.id,
+        } , function (
+          err,
+          res
+        ) {
           if (err) throw err;
           console.log(res.affectedRows + " item inserted!\n");
           init();
@@ -134,6 +124,8 @@ function addRole() {
       });
   });
 }
+
+  
 
 //need to figure out how to connect role to role_id????????????/
 function addEmployee() {
