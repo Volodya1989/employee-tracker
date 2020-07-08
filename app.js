@@ -34,6 +34,7 @@ function init() {
       addDepartment();
     } else if (data.userChoice === "Add roles") {
       console.log("Add roles");
+      addRole();
     } else if (data.userChoice === "Add employees") {
       console.log("Add employees");
     } else if (data.userChoice === "View departments") {
@@ -67,25 +68,18 @@ function addDepartment() {
       ) {
         if (err) throw err;
         console.log(res.affectedRows + " item inserted!\n");
-        // readItems();
         init();
       });
     });
 }
 
 function addRole() {
-    console.log("add department");
+    console.log("add role");
     inquirer
-      .prompt([
-        {
-          type: "input",
-          name: "name",
-          message: "What is the name of Department?",
-        },
-      ])
+      .prompt(questions.arrayofRoles)
       .then((data) => {
         console.log(data);
-        connection.query("INSERT INTO department SET ?", data, function (
+        connection.query("INSERT INTO role SET ?", data, function (
           err,
           res
         ) {
