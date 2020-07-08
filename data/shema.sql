@@ -25,3 +25,16 @@ CREATE TABLE employee (
     FOREIGN KEY (manager_id) REFERENCES employee(id),
     PRIMARY KEY (id)
 );
+
+-- INSERT INTO role (title, salary, department_id)
+-- VALUES ("Recruiter", 118000, 5);
+-- SELECT * FROM department;
+
+-- SELECT * FROM role;
+
+-- update role
+-- set salary = 100000
+-- where id=1;
+
+-- delete from department
+-- where id=7;
