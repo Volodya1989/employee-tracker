@@ -130,7 +130,7 @@ function addRole() {
 //need to figure out how to connect role to role_id????????????/
 function addEmployee() {
   console.log("add employee");
-  connection.query("SELECT title FROM role", function (err, res) {
+  connection.query("SELECT * FROM role", function (err, res) {
     if (err) throw err;
     // Log all results of the SELECT statement
     // console.log(res);
@@ -158,13 +158,26 @@ function addEmployee() {
           type: "list",
           message: "Who is employee's manager?",
           name: "manager_id",
-          choices: ["Manager1", "Manager2", "Manager3"],
+          choices: [1, 2, 3],
         },
       ])
       .then((data) => {
         console.log(data);
 
-        connection.query("INSERT INTO employee SET ?", data, function (
+        let selectedId = {};
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].title === data.role_id) {
+            selectedId = res[i];
+          }
+        }
+        console.log(selectedId.id)
+        const { first_name, last_name,manager_id } = data;
+        connection.query("INSERT INTO employee SET ?", {
+          first_name:first_name,
+          last_name:last_name,
+          role_id:selectedId.id,
+          manager_id:manager_id,
+        }, function (
           err,
           res
         ) {
