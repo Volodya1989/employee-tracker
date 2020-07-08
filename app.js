@@ -22,7 +22,6 @@ const add = new Add();
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId + "\n");
-  //   readItems();
   init();
 });
 
@@ -37,6 +36,7 @@ function init() {
       addRole();
     } else if (data.userChoice === "Add employees") {
       console.log("Add employees");
+      addEmployee();
     } else if (data.userChoice === "View departments") {
       console.log("View departments");
     } else if (data.userChoice === "View roles") {
@@ -50,6 +50,30 @@ function init() {
     }
   });
 }
+
+// function addDepartment() {
+//     console.log("add department");
+//     inquirer
+//       .prompt([
+//         {
+//           type: "input",
+//           name: "name",
+//           message: "What is the name of Department?",
+//         },
+//       ])
+//       .then((data) => {
+//         console.log(data);
+//         connection.query("INSERT INTO department SET ?", data, function (
+//           err,
+//           res
+//         ) {
+//           if (err) throw err;
+//           console.log(res.affectedRows + " item inserted!\n");
+//           init();
+//         });
+//       });
+//   }
+
 function addDepartment() {
   console.log("add department");
   inquirer
@@ -73,20 +97,83 @@ function addDepartment() {
     });
 }
 
+//need to figure out how to connect department to department_id????????????/
 function addRole() {
-    console.log("add role");
+  console.log("add role");
+  connection.query("SELECT name FROM department", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    // console.log(res);
+    const arrayOfDepartments = res.map((item) => item.name);
     inquirer
-      .prompt(questions.arrayofRoles)
+      .prompt([
+        {
+          type: "input",
+          message: "What role would you like to add?",
+          name: "title",
+        },
+        {
+          type: "input",
+          message: "What is the salary for this role?",
+          name: "salary",
+        },
+        {
+          type: "list",
+          message: "To which department this role belongs?",
+          name: "department_id",
+          choices: arrayOfDepartments,
+        },
+      ])
       .then((data) => {
         console.log(data);
-        connection.query("INSERT INTO role SET ?", data, function (
+        connection.query("INSERT INTO role SET ?", data, function (err, res) {
+          if (err) throw err;
+          console.log(res.affectedRows + " item inserted!\n");
+          init();
+        });
+      });
+  });
+}
+
+//need to figure out how to connect role to role_id????????????/
+function addEmployee() {
+  console.log("add employee");
+  connection.query("SELECT title FROM role", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    // console.log(res);
+    const arrayOfTitles = res.map((item) => item.title);
+
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "What is the employee's first name?",
+          name: "first_name",
+        },
+        {
+          type: "input",
+          message: "What is the employee's last name?",
+          name: "last_name",
+        },
+        {
+          type: "list",
+          message: "What is employee's role?",
+          name: "role_id",
+          choices: arrayOfTitles,
+        },
+      ])
+      .then((data) => {
+        console.log(data);
+
+        connection.query("INSERT INTO employee SET ?", data, function (
           err,
           res
         ) {
           if (err) throw err;
           console.log(res.affectedRows + " item inserted!\n");
-          // readItems();
           init();
         });
       });
-  }
+  });
+}
