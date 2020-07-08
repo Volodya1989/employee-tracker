@@ -15,6 +15,8 @@ const connection = mysql.createConnection({
   // Your password
   password: "Conyers2019!",
   database: "employee_tracker_db",
+  // database: "employeedb",
+
 });
 
 connection.connect(function (err) {
@@ -37,12 +39,16 @@ function init() {
       addEmployee();
     } else if (data.userChoice === "View departments") {
       console.log("View departments");
+      viewDepartments()
     } else if (data.userChoice === "View roles") {
       console.log("View roles");
+      viewRoles()
     } else if (data.userChoice === "View employees") {
       console.log("View employees");
+      viewEmployee()
     } else if (data.userChoice === "Update employee roles") {
       console.log("Update employee roles");
+      updateEmployee()
     } else {
       connection.end();
     }
@@ -127,7 +133,7 @@ function addRole() {
 
   
 
-//need to figure out how to connect role to role_id????????????/
+//need to figure out how to connect role to manager_id????????????/
 function addEmployee() {
   console.log("add employee");
   connection.query("SELECT * FROM role", function (err, res) {
@@ -178,6 +184,124 @@ function addEmployee() {
           role_id:selectedId.id,
           manager_id:manager_id,
         }, function (
+          err,
+          res
+        ) {
+          if (err) throw err;
+          console.log(res.affectedRows + " item inserted!\n");
+          init();
+        });
+      });
+  });
+}
+
+function viewDepartments() {
+  
+  const queryString = `SELECT * FROM department`;
+  connection.query(queryString, function (err, data) {
+    if (err) throw err;
+    console.table(data);
+    init();
+  });
+}
+function viewRoles() {
+  
+  const queryString = `SELECT * FROM role`;
+  connection.query(queryString, function (err, data) {
+    if (err) throw err;
+    console.table(data);
+    init();
+  });
+}
+function viewEmployee() {
+  
+  const queryString = `SELECT * FROM employee`;
+  connection.query(queryString, function (err, data) {
+    if (err) throw err;
+    console.table(data);
+    init();
+  });
+}
+//needs to be improved???
+function updateEmployee() {
+  connection.query("SELECT * FROM employee", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    console.log(res);
+    const arrayOfEmployee = res.map((item) => `${item.first_name} ${item.last_name} `);
+
+    inquirer
+      .prompt([
+       
+        {
+          type: "list",
+          message: "Whom of employee's do you want to choose?",
+          name: "name",
+          choices: arrayOfEmployee,
+        }
+      ])
+      .then((data) => {
+        console.log(data);
+
+        let selectedId = {};
+        for (let i = 0; i < res.length; i++) {
+          if (`${res[i].first_name} ${res[i].last_name}` === data.name) {
+            selectedId = res[i];
+          }
+        }
+         selectedId;
+        console.log(selectedId)
+        updateRole(id)
+        // const { first_name, last_name,manager_id } = data;
+        // connection.query("INSERT INTO employee SET ?", {
+        //   first_name:first_name,
+        //   last_name:last_name,
+        //   role_id:selectedId.id,
+        //   manager_id:manager_id,
+        // }, function (
+        //   err,
+        //   res
+        // ) {
+        //   if (err) throw err;
+        //   console.log(res.affectedRows + " item inserted!\n");
+        //   init();
+        // });
+      });
+  });
+}
+
+
+
+
+function updateRole(name) {
+  console.log("add employee");
+  connection.query("SELECT * FROM role", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    // console.log(res);
+    const arrayOfTitles = res.map((item) => item.title);
+
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "What is new role for this employee?",
+          name: "role_id",
+          choices: arrayOfTitles,
+        }
+      ])
+      .then((data) => {
+        console.log(data);
+
+        let selectedId = {};
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].title === data.role_id) {
+            selectedId = res[i];
+          }
+        }
+        console.log(selectedId.id)
+        connection.query(`UPDATE employee
+        SET role_id = ? WHERE id=?;`,[selectedId.id, name], function (
           err,
           res
         ) {
