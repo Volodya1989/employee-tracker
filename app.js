@@ -162,6 +162,12 @@ function addEmployee() {
           name: "role_id",
           choices: arrayOfTitles,
         },
+        {
+          type: "list",
+          message: "Who is employee's manager?",
+          name: "manager_id",
+          choices: ["Manager1", "Manager2", "Manager3"],
+        },
       ])
       .then((data) => {
         console.log(data);
