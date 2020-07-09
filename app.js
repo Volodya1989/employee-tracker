@@ -51,10 +51,13 @@ function init() {
     } else if (data.userChoice === "Delete employee") {
       console.log("Delete employee");
       deleteEmployee();
-    }  else if (data.userChoice === "Delete role") {
+    } else if (data.userChoice === "Delete role") {
       console.log("Delete role");
-      deleteRole()
-    }else {
+      deleteRole();
+    } else if (data.userChoice === "Delete department") {
+      console.log("Delete department");
+      deleteDepartment();
+    } else {
       connection.end();
     }
   });
@@ -431,8 +434,8 @@ function deleteRole() {
       .prompt([
         {
           type: "list",
-          message: "Which rile  do you want to delete?",
-          name: "name",
+          message: "Which role do you want to delete?",
+          name: "title",
           choices: arrayOfTitles,
         },
       ])
@@ -441,17 +444,55 @@ function deleteRole() {
 
         let selectedId = {};
         for (let i = 0; i < res.length; i++) {
-          if (res[i].name === data.department_id) {
+          if (res[i].title === data.title) {
             selectedId = res[i];
           }
         }
-        const {id} = selectedId;
+        const { id } = selectedId;
         connection.query(`DELETE FROM role WHERE id =?`, [id], function (
           err,
           res
         ) {
           if (err) throw err;
           console.log(res.affectedRows + " deleted role!\n");
+          init();
+        });
+      });
+  });
+}
+
+function deleteDepartment() {
+  connection.query("SELECT * FROM department", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    // console.log(res);
+    const arrayOfDepartments = res.map((item) => item.name);
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "Which department do you want to delete?",
+          name: "name",
+          choices: arrayOfDepartments,
+        },
+      ])
+      .then((data) => {
+        console.log(data);
+
+        let selectedId = {};
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].name === data.name) {
+            selectedId = res[i];
+          }
+        }
+        const { id } = selectedId;
+        console.log()
+        connection.query(`DELETE FROM department WHERE id =?`, [id], function (
+          err,
+          res
+        ) {
+          if (err) throw err;
+          console.log(res.affectedRows + " deleted department!\n");
           init();
         });
       });
