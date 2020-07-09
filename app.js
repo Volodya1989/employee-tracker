@@ -16,7 +16,6 @@ const connection = mysql.createConnection({
   database: "employee_tracker_db",
 });
 
-
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId + "\n");
@@ -43,16 +42,17 @@ function init() {
     } else if (data.userChoice === "View employees") {
       console.log("View employees");
       viewEmployee();
-    } else if (data.userChoice === "Update employee roles") {
+    } else if (data.userChoice === "Update employee role") {
       console.log("Update employee roles");
       updateEmployee();
+    } else if (data.userChoice === "Update employee manager") {
+      console.log("Update employee roles");
+      updateEmployeeManager();
     } else {
       connection.end();
     }
   });
-};
-
-
+}
 
 function addDepartment() {
   inquirer
@@ -97,7 +97,7 @@ function addRole() {
           type: "list",
           message: "To which department this role belongs?",
           name: "department_id",
-          choices: arrayOfDepartments, 
+          choices: arrayOfDepartments,
         },
       ])
       .then((data) => {
@@ -146,7 +146,7 @@ function addEmployee() {
         name: `${first_name} ${last_name} `,
         value: id,
       }));
-      arrayOfManagers.push({name:"none", value: null})
+      arrayOfManagers.push({ name: "none", value: null });
       inquirer
         .prompt([
           {
@@ -292,6 +292,87 @@ function updateRole(name) {
           `UPDATE employee
         SET role_id = ? WHERE id=?;`,
           [selectedId.id, name],
+          function (err, res) {
+            if (err) throw err;
+            console.log(res.affectedRows + " item inserted!\n");
+            init();
+          }
+        );
+      });
+  });
+}
+
+function updateEmployeeManager() {
+  connection.query("SELECT * FROM employee", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    console.log(res);
+    // const arrayOfEmployee = res.map((item) => `${item.first_name} ${item.last_name} `);
+    const arrayOfEmployee = res.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name} `,
+      value: id,
+    }));
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "Whom of employee's do you want to choose?",
+          name: "name",
+          choices: arrayOfEmployee,
+        },
+      ])
+      .then((data) => {
+        console.log(data);
+
+        let empId = {};
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].id === data.name) {
+            empId = res[i].id;
+          }
+        }
+        updateManager(empId);
+      });
+  });
+}
+
+function updateManager(name) {
+  console.log("add employee");
+  connection.query("SELECT * FROM employee WHERE role_id=11", function (
+    err,
+    man
+  ) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    // console.log(res);
+    const arrayOfManagers = man.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name} `,
+      value: id,
+    }));
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "Who is the new manager for this employee?",
+          name: "manager_id",
+          choices: arrayOfManagers,
+        },
+      ])
+      .then((data) => {
+        console.log(data);
+
+        // let selectedId = {};
+        // for (let i = 0; i < res.length; i++) {
+        //   if (res[i].title === data.role_id) {
+        //     selectedId = res[i];
+        //   }
+        // }
+        // console.log(selectedId.id);
+        const {  manager_id } = data;
+
+        connection.query(
+          `UPDATE employee
+        SET manager_id = ? WHERE id=?;`,
+          [manager_id, name],
           function (err, res) {
             if (err) throw err;
             console.log(res.affectedRows + " item inserted!\n");
