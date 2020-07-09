@@ -51,7 +51,10 @@ function init() {
     } else if (data.userChoice === "Delete employee") {
       console.log("Delete employee");
       deleteEmployee();
-    } else {
+    }  else if (data.userChoice === "Delete role") {
+      console.log("Delete role");
+      deleteRole()
+    }else {
       connection.end();
     }
   });
@@ -412,6 +415,43 @@ function deleteEmployee() {
         ) {
           if (err) throw err;
           console.log(res.affectedRows + " deleted employee!\n");
+          init();
+        });
+      });
+  });
+}
+
+function deleteRole() {
+  connection.query("SELECT * FROM role", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    // console.log(res);
+    const arrayOfTitles = res.map((item) => item.title);
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "Which rile  do you want to delete?",
+          name: "name",
+          choices: arrayOfTitles,
+        },
+      ])
+      .then((data) => {
+        console.log(data);
+
+        let selectedId = {};
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].name === data.department_id) {
+            selectedId = res[i];
+          }
+        }
+        const {id} = selectedId;
+        connection.query(`DELETE FROM role WHERE id =?`, [id], function (
+          err,
+          res
+        ) {
+          if (err) throw err;
+          console.log(res.affectedRows + " deleted role!\n");
           init();
         });
       });
