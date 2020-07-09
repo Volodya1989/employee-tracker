@@ -57,7 +57,13 @@ function init() {
     } else if (data.userChoice === "Delete department") {
       console.log("Delete department");
       deleteDepartment();
-    } else {
+    } else if (data.userChoice === "View all info") {
+      console.log("View all info");
+      viewAll()
+
+    }
+    
+    else {
       connection.end();
     }
   });
@@ -230,6 +236,14 @@ function viewRoles() {
 }
 function viewEmployee() {
   const queryString = `SELECT * FROM employee`;
+  connection.query(queryString, function (err, data) {
+    if (err) throw err;
+    console.table(data);
+    init();
+  });
+}
+function viewAll() {
+  const queryString = `SELECT employee.id, first_name, last_name, title,  name as department_name, manager_id,salary FROM role JOIN department ON role.department_id=department.id RIGHT JOIN employee ON role.id=employee.role_id`;
   connection.query(queryString, function (err, data) {
     if (err) throw err;
     console.table(data);
@@ -486,7 +500,7 @@ function deleteDepartment() {
           }
         }
         const { id } = selectedId;
-        console.log()
+        console.log();
         connection.query(`DELETE FROM department WHERE id =?`, [id], function (
           err,
           res
