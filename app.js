@@ -46,8 +46,11 @@ function init() {
       console.log("Update employee roles");
       updateEmployee();
     } else if (data.userChoice === "Update employee manager") {
-      console.log("Update employee roles");
+      console.log("Update employee manager");
       updateEmployeeManager();
+    } else if (data.userChoice === "Delete employee") {
+      console.log("Delete employee");
+      deleteEmployee();
     } else {
       connection.end();
     }
@@ -359,15 +362,7 @@ function updateManager(name) {
       ])
       .then((data) => {
         console.log(data);
-
-        // let selectedId = {};
-        // for (let i = 0; i < res.length; i++) {
-        //   if (res[i].title === data.role_id) {
-        //     selectedId = res[i];
-        //   }
-        // }
-        // console.log(selectedId.id);
-        const {  manager_id } = data;
+        const { manager_id } = data;
 
         connection.query(
           `UPDATE employee
@@ -379,6 +374,46 @@ function updateManager(name) {
             init();
           }
         );
+      });
+  });
+}
+
+function deleteEmployee() {
+  connection.query("SELECT * FROM employee", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    console.log(res);
+    // const arrayOfEmployee = res.map((item) => `${item.first_name} ${item.last_name} `);
+    const arrayOfEmployee = res.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name} `,
+      value: id,
+    }));
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "Whom of employee's do you want to choose?",
+          name: "name",
+          choices: arrayOfEmployee,
+        },
+      ])
+      .then((data) => {
+        console.log(data);
+
+        let empId = {};
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].id === data.name) {
+            empId = res[i].id;
+          }
+        }
+        connection.query(`DELETE FROM employee WHERE id =?`, [empId], function (
+          err,
+          res
+        ) {
+          if (err) throw err;
+          console.log(res.affectedRows + " deleted employee!\n");
+          init();
+        });
       });
   });
 }
