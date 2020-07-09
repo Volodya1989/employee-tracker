@@ -1,6 +1,4 @@
-# gt-employee-tracker
-
-# Team Generator CLI Application
+# Employee Tracker CLI Application
 
 ![badmath](https://img.shields.io/badge/EMPLOYEE-tracker-red)
 
