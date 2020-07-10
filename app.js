@@ -23,7 +23,6 @@ connection.connect(function (err) {
 });
 function init() {
   inquirer.prompt(questions.arrayOfChoices).then((data) => {
-    console.log(data);
     if (data.userChoice === "Add departments") {
       console.log("Add departments");
       addDepartment();
@@ -43,7 +42,7 @@ function init() {
       console.log("View employees");
       viewEmployee();
     } else if (data.userChoice === "Update employee role") {
-      console.log("Update employee roles");
+      console.log("Update employee role");
       updateEmployee();
     } else if (data.userChoice === "Update employee manager") {
       console.log("Update employee manager");
@@ -84,7 +83,7 @@ function addDepartment() {
         res
       ) {
         if (err) throw err;
-        console.log(res.affectedRows + " item inserted!\n");
+        console.log(res.affectedRows + "new department added\n");
         init();
       });
     });
@@ -93,8 +92,6 @@ function addDepartment() {
 function addRole() {
   connection.query("SELECT * FROM department", function (err, res) {
     if (err) throw err;
-    // Log all results of the SELECT statement
-    // console.log(res);
     const arrayOfDepartments = res.map((item) => item.name);
     inquirer
       .prompt([
@@ -116,14 +113,12 @@ function addRole() {
         },
       ])
       .then((data) => {
-        // console.log(data);
         let selectedId = {};
         for (let i = 0; i < res.length; i++) {
           if (res[i].name === data.department_id) {
             selectedId = res[i];
           }
         }
-        // console.log(selectedId);
         const { title, salary } = data;
         connection.query(
           "INSERT INTO role SET ?",
@@ -134,7 +129,7 @@ function addRole() {
           },
           function (err, res) {
             if (err) throw err;
-            console.log(res.affectedRows + " item inserted!\n");
+            console.log(res.affectedRows + "new role added\n");
             init();
           }
         );
@@ -144,19 +139,14 @@ function addRole() {
 
 //function that adds new employee
 function addEmployee() {
-  console.log("add employee");
   connection.query("SELECT * FROM role", function (err, res) {
     if (err) throw err;
-    // Log all results of the SELECT statement
-    // console.log(res);
     const arrayOfTitles = res.map((item) => item.title);
     connection.query("SELECT * FROM employee WHERE role_id=11", function (
       err,
       man
     ) {
       if (err) throw err;
-      // Log all results of the SELECT statement
-      // console.log(res);
       const arrayOfManagers = man.map(({ id, first_name, last_name }) => ({
         name: `${first_name} ${last_name} `,
         value: id,
@@ -188,16 +178,12 @@ function addEmployee() {
           },
         ])
         .then((data) => {
-          console.log(data);
-
           let selectedId = {};
           for (let i = 0; i < res.length; i++) {
             if (res[i].title === data.role_id) {
               selectedId = res[i];
             }
           }
-
-          console.log(selectedId.id);
           const { first_name, last_name, manager_id } = data;
           connection.query(
             "INSERT INTO employee SET ?",
@@ -209,7 +195,7 @@ function addEmployee() {
             },
             function (err, res) {
               if (err) throw err;
-              console.log(res.affectedRows + " item inserted!\n");
+              console.log(res.affectedRows + " new employee added\n");
               init();
             }
           );
@@ -250,13 +236,10 @@ function viewAll() {
     init();
   });
 }
-//needs to be improved???
+//update employee function
 function updateEmployee() {
   connection.query("SELECT * FROM employee", function (err, res) {
     if (err) throw err;
-    // Log all results of the SELECT statement
-    console.log(res);
-    // const arrayOfEmployee = res.map((item) => `${item.first_name} ${item.last_name} `);
     const arrayOfEmployee = res.map(({ id, first_name, last_name }) => ({
       name: `${first_name} ${last_name} `,
       value: id,
@@ -271,8 +254,6 @@ function updateEmployee() {
         },
       ])
       .then((data) => {
-        // console.log(data);
-
         let empId = {};
         for (let i = 0; i < res.length; i++) {
           if (res[i].id === data.name) {
@@ -285,13 +266,9 @@ function updateEmployee() {
 }
 
 function updateRole(name) {
-  console.log("add employee");
   connection.query("SELECT * FROM role", function (err, res) {
     if (err) throw err;
-    // Log all results of the SELECT statement
-    // console.log(res);
     const arrayOfTitles = res.map((item) => item.title);
-
     inquirer
       .prompt([
         {
@@ -302,22 +279,19 @@ function updateRole(name) {
         },
       ])
       .then((data) => {
-        console.log(data);
-
         let selectedId = {};
         for (let i = 0; i < res.length; i++) {
           if (res[i].title === data.role_id) {
             selectedId = res[i];
           }
         }
-        console.log(selectedId.id);
         connection.query(
           `UPDATE employee
         SET role_id = ? WHERE id=?;`,
           [selectedId.id, name],
           function (err, res) {
             if (err) throw err;
-            console.log(res.affectedRows + " item inserted!\n");
+            console.log(res.affectedRows + " employee's role is updated\n");
             init();
           }
         );
@@ -328,9 +302,6 @@ function updateRole(name) {
 function updateEmployeeManager() {
   connection.query("SELECT * FROM employee", function (err, res) {
     if (err) throw err;
-    // Log all results of the SELECT statement
-    console.log(res);
-    // const arrayOfEmployee = res.map((item) => `${item.first_name} ${item.last_name} `);
     const arrayOfEmployee = res.map(({ id, first_name, last_name }) => ({
       name: `${first_name} ${last_name} `,
       value: id,
@@ -345,8 +316,6 @@ function updateEmployeeManager() {
         },
       ])
       .then((data) => {
-        console.log(data);
-
         let empId = {};
         for (let i = 0; i < res.length; i++) {
           if (res[i].id === data.name) {
@@ -359,14 +328,11 @@ function updateEmployeeManager() {
 }
 
 function updateManager(name) {
-  console.log("add employee");
   connection.query("SELECT * FROM employee WHERE role_id=11", function (
     err,
     man
   ) {
     if (err) throw err;
-    // Log all results of the SELECT statement
-    // console.log(res);
     const arrayOfManagers = man.map(({ id, first_name, last_name }) => ({
       name: `${first_name} ${last_name} `,
       value: id,
@@ -381,16 +347,14 @@ function updateManager(name) {
         },
       ])
       .then((data) => {
-        console.log(data);
         const { manager_id } = data;
-
         connection.query(
           `UPDATE employee
         SET manager_id = ? WHERE id=?;`,
           [manager_id, name],
           function (err, res) {
             if (err) throw err;
-            console.log(res.affectedRows + " item inserted!\n");
+            console.log(res.affectedRows + " employee's manager is updated\n");
             init();
           }
         );
@@ -401,9 +365,6 @@ function updateManager(name) {
 function deleteEmployee() {
   connection.query("SELECT * FROM employee", function (err, res) {
     if (err) throw err;
-    // Log all results of the SELECT statement
-    console.log(res);
-    // const arrayOfEmployee = res.map((item) => `${item.first_name} ${item.last_name} `);
     const arrayOfEmployee = res.map(({ id, first_name, last_name }) => ({
       name: `${first_name} ${last_name} `,
       value: id,
@@ -418,8 +379,6 @@ function deleteEmployee() {
         },
       ])
       .then((data) => {
-        console.log(data);
-
         let empId = {};
         for (let i = 0; i < res.length; i++) {
           if (res[i].id === data.name) {
@@ -431,7 +390,7 @@ function deleteEmployee() {
           res
         ) {
           if (err) throw err;
-          console.log(res.affectedRows + " deleted employee!\n");
+          console.log(res.affectedRows + " employee is deleted\n");
           init();
         });
       });
@@ -441,8 +400,6 @@ function deleteEmployee() {
 function deleteRole() {
   connection.query("SELECT * FROM role", function (err, res) {
     if (err) throw err;
-    // Log all results of the SELECT statement
-    // console.log(res);
     const arrayOfTitles = res.map((item) => item.title);
     inquirer
       .prompt([
@@ -454,8 +411,6 @@ function deleteRole() {
         },
       ])
       .then((data) => {
-        console.log(data);
-
         let selectedId = {};
         for (let i = 0; i < res.length; i++) {
           if (res[i].title === data.title) {
@@ -468,7 +423,7 @@ function deleteRole() {
           res
         ) {
           if (err) throw err;
-          console.log(res.affectedRows + " deleted role!\n");
+          console.log(res.affectedRows + " role is deleted\n");
           init();
         });
       });
@@ -478,8 +433,6 @@ function deleteRole() {
 function deleteDepartment() {
   connection.query("SELECT * FROM department", function (err, res) {
     if (err) throw err;
-    // Log all results of the SELECT statement
-    // console.log(res);
     const arrayOfDepartments = res.map((item) => item.name);
     inquirer
       .prompt([
@@ -491,8 +444,6 @@ function deleteDepartment() {
         },
       ])
       .then((data) => {
-        console.log(data);
-
         let selectedId = {};
         for (let i = 0; i < res.length; i++) {
           if (res[i].name === data.name) {
@@ -500,13 +451,12 @@ function deleteDepartment() {
           }
         }
         const { id } = selectedId;
-        console.log();
         connection.query(`DELETE FROM department WHERE id =?`, [id], function (
           err,
           res
         ) {
           if (err) throw err;
-          console.log(res.affectedRows + " deleted department!\n");
+          console.log(res.affectedRows + " department is deleted\n");
           init();
         });
       });
