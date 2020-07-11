@@ -15,8 +15,10 @@
 ## Installation
 
 1. Clone the repo.
-2. Run npm install command in your terminal/bash.
-3. Then run node app.js command in your terminal/bash.
+2. Insert your password into sql connection.
+3. Run shema.sql file in sql workbanch.
+4. Run npm install command in your terminal/bash.
+5. Then run node app.js command in your terminal/bash.
 
 ## Usage
 
@@ -63,6 +65,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
- <!-- ## Contributing
-
-If you would like to contribute to this project, please follow the [Contributor Covenant](https://www.contributor-covenant.org/) guidelines.  -->
