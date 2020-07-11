@@ -3,7 +3,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const questions = require("./lib/questions");
-const Add = require("./lib/crud");
 //connect my database
 const connection = mysql.createConnection({
   host: "localhost",
@@ -11,16 +10,22 @@ const connection = mysql.createConnection({
   port: 3306,
 
   user: "root",
-
-  password: "Conyers2019!",
+  //insert your password
+  password: "",
   database: "employee_tracker_db",
 });
-
+//queries
+const viewDep = `SELECT * FROM department`;
+const viewRol = `SELECT * FROM role`;
+const viewEmpl = `SELECT * FROM employee`;
+const viewAll = `SELECT employee.id, first_name, last_name, title,  name as department_name, manager_id,salary FROM role JOIN department ON role.department_id=department.id RIGHT JOIN employee ON role.id=employee.role_id`;
+const selectManagers = `SELECT * FROM employee_tracker_db.employee WHERE manager_id IS NULL`;
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId + "\n");
   init();
 });
+//function that redirects user according to their answers
 function init() {
   inquirer.prompt(questions.arrayOfChoices).then((data) => {
     if (data.userChoice === "Add departments") {
@@ -34,13 +39,13 @@ function init() {
       addEmployee();
     } else if (data.userChoice === "View departments") {
       console.log("View departments");
-      viewDepartments();
+      viewSections(viewDep);
     } else if (data.userChoice === "View roles") {
       console.log("View roles");
-      viewRoles();
+      viewSections(viewRol);
     } else if (data.userChoice === "View employees") {
       console.log("View employees");
-      viewEmployee();
+      viewSections(viewEmpl);
     } else if (data.userChoice === "Update employee role") {
       console.log("Update employee role");
       updateEmployee();
@@ -58,16 +63,13 @@ function init() {
       deleteDepartment();
     } else if (data.userChoice === "View all info") {
       console.log("View all info");
-      viewAll()
-
-    }
-    
-    else {
+      viewSections(viewAll);
+    } else {
       connection.end();
     }
   });
 }
-
+//function that adds new department
 function addDepartment() {
   inquirer
     .prompt([
@@ -88,7 +90,7 @@ function addDepartment() {
       });
     });
 }
-
+//function that adds new role
 function addRole() {
   connection.query("SELECT * FROM department", function (err, res) {
     if (err) throw err;
@@ -142,10 +144,7 @@ function addEmployee() {
   connection.query("SELECT * FROM role", function (err, res) {
     if (err) throw err;
     const arrayOfTitles = res.map((item) => item.title);
-    connection.query("SELECT * FROM employee WHERE role_id=11", function (
-      err,
-      man
-    ) {
+    connection.query(selectManagers, function (err, man) {
       if (err) throw err;
       const arrayOfManagers = man.map(({ id, first_name, last_name }) => ({
         name: `${first_name} ${last_name} `,
@@ -203,40 +202,16 @@ function addEmployee() {
     });
   });
 }
+//general function to view departments, roles, employee and all info together by using appropriate declared queries
+function viewSections(queryString) {
+  connection.query(queryString, function (err, data) {
+    if (err) throw err;
+    console.table(data);
+    init();
+  });
+}
 
-function viewDepartments() {
-  const queryString = `SELECT * FROM department`;
-  connection.query(queryString, function (err, data) {
-    if (err) throw err;
-    console.table(data);
-    init();
-  });
-}
-function viewRoles() {
-  const queryString = `SELECT * FROM role`;
-  connection.query(queryString, function (err, data) {
-    if (err) throw err;
-    console.table(data);
-    init();
-  });
-}
-function viewEmployee() {
-  const queryString = `SELECT * FROM employee`;
-  connection.query(queryString, function (err, data) {
-    if (err) throw err;
-    console.table(data);
-    init();
-  });
-}
-function viewAll() {
-  const queryString = `SELECT employee.id, first_name, last_name, title,  name as department_name, manager_id,salary FROM role JOIN department ON role.department_id=department.id RIGHT JOIN employee ON role.id=employee.role_id`;
-  connection.query(queryString, function (err, data) {
-    if (err) throw err;
-    console.table(data);
-    init();
-  });
-}
-//update employee function
+//update employee's role function
 function updateEmployee() {
   connection.query("SELECT * FROM employee", function (err, res) {
     if (err) throw err;
@@ -264,7 +239,7 @@ function updateEmployee() {
       });
   });
 }
-
+//this function goes inside updateEmployee function
 function updateRole(name) {
   connection.query("SELECT * FROM role", function (err, res) {
     if (err) throw err;
@@ -298,7 +273,7 @@ function updateRole(name) {
       });
   });
 }
-
+//update employee's manager function
 function updateEmployeeManager() {
   connection.query("SELECT * FROM employee", function (err, res) {
     if (err) throw err;
@@ -326,17 +301,15 @@ function updateEmployeeManager() {
       });
   });
 }
-
+//this function goes inside updateManager function
 function updateManager(name) {
-  connection.query("SELECT * FROM employee WHERE role_id=11", function (
-    err,
-    man
-  ) {
+  connection.query(selectManagers, function (err, man) {
     if (err) throw err;
     const arrayOfManagers = man.map(({ id, first_name, last_name }) => ({
       name: `${first_name} ${last_name} `,
       value: id,
     }));
+    arrayOfManagers.push({ name: "none", value: null });
     inquirer
       .prompt([
         {
@@ -361,7 +334,7 @@ function updateManager(name) {
       });
   });
 }
-
+//function responsible for deleting employee
 function deleteEmployee() {
   connection.query("SELECT * FROM employee", function (err, res) {
     if (err) throw err;
@@ -396,7 +369,7 @@ function deleteEmployee() {
       });
   });
 }
-
+//function responsible for deleting role
 function deleteRole() {
   connection.query("SELECT * FROM role", function (err, res) {
     if (err) throw err;
@@ -429,7 +402,7 @@ function deleteRole() {
       });
   });
 }
-
+//function responsible for deleting department
 function deleteDepartment() {
   connection.query("SELECT * FROM department", function (err, res) {
     if (err) throw err;
